@@ -154,8 +154,25 @@ fi
 # ============================================================================
 
 # --- Extra mise-managed tools ---
+# node + pnpm are the JS toolchain for Node-based apps (e.g. running a bundled
+# MCP server or a Vite frontend from a checked-out repo). zellij is the
+# multiplexer. All pinned/global via mise so they persist under /home/coder.
 if command -v mise >/dev/null 2>&1; then
   mise use -g zellij@latest || true
+  mise use -g node@20 || true
+  mise use -g pnpm@latest || true
+fi
+
+# --- Rust toolchain (rootless via rustup) ---
+# Installs the stable toolchain into ~/.rustup + ~/.cargo (no root needed). PATH
+# already includes ~/.cargo/bin (see the shell env below). Idempotent: skip when
+# cargo is already present. Note: this is only the base Rust toolchain; building
+# native GUI crates (GTK/WebKit-based desktop apps) additionally needs system
+# dev libraries that aren't installed here.
+if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+  echo "Installing Rust (stable) via rustup..."
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --no-modify-path --profile minimal --default-toolchain stable || true
 fi
 
 # --- gh CLI extensions ---
