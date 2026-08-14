@@ -47,6 +47,9 @@ workspace image; the dotfiles only wire them up.
 | Tool | Layer | Where | Purpose |
 |------|-------|-------|---------|
 | **zellij** *(via mise)* | [general] | mise global | Terminal multiplexer; config + layout symlinked from `.config/zellij/` |
+| **node** *(via mise)* | [general] | mise global | Node.js 20 (JS runtime for Node-based apps and MCP servers) |
+| **pnpm** *(via mise)* | [general] | mise global | Fast Node package manager (pinned latest) |
+| **rust** *(via rustup)* | [general] | `~/.cargo`, `~/.rustup` | Stable toolchain (`cargo`, `rustc`), rootless. Base toolchain only; native GUI crates need extra system dev libs |
 | **gh-stack** *(gh extension)* | [general] | `gh` extensions | `gh stack` - GitHub stacked PRs (`github/gh-stack`) |
 | **zellaude** *(zellij plugin)* | [general] | `.config/zellij/layouts/default.kdl` | Claude Code activity bar. Pinned to `v0.5.0`; zellij fetches the wasm on first use and it auto-installs hooks into `~/.claude/settings.json`. Needs `jq`. `install.sh` pre-grants its zellij plugin permissions (scoped to the pinned URL) so the first-run permission popup is skipped |
 | **mosh-server** | [general] | `~/.local/mosh` | Roaming SSH; conda-forge build (no root needed) |
