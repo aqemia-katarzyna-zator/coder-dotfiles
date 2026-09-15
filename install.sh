@@ -183,6 +183,48 @@ if command -v gh >/dev/null 2>&1; then
   fi
 fi
 
+# --- leaf (terminal Markdown previewer) -> ~/.local/bin ---
+# Not in the mise registry and `cargo install` would rebuild it from source on a
+# fresh workspace, so fetch the published release binary instead. The upstream
+# one-line installer is not pinned and would re-download on every start, so we
+# resolve the latest tag through the GitHub releases redirect (no API call, so
+# no anonymous rate limit), then verify the download against the published
+# checksums.txt. Idempotent: skip when leaf is already on PATH; run `leaf
+# --update` to move to a newer release.
+install_leaf() {
+  command -v leaf >/dev/null 2>&1 && return 0
+  local asset tag base tmp
+  case "$(uname -m)" in
+    x86_64)          asset=leaf-linux-x86_64 ;;
+    aarch64|arm64)   asset=leaf-linux-arm64 ;;
+    *) echo "install_leaf: unsupported architecture $(uname -m)" >&2; return 1 ;;
+  esac
+  tag=$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
+        https://github.com/RivoLink/leaf/releases/latest | sed 's|.*/tag/||')
+  if [ -z "$tag" ]; then
+    echo "install_leaf: failed to determine latest version" >&2
+    return 1
+  fi
+  echo "Installing leaf $tag..."
+  base="https://github.com/RivoLink/leaf/releases/download/$tag"
+  tmp=$(mktemp -d)
+  mkdir -p ~/.local/bin
+  curl -fsSL "$base/$asset" -o "$tmp/$asset" \
+    && curl -fsSL "$base/checksums.txt" -o "$tmp/checksums.txt" \
+    && (cd "$tmp" && grep " $asset\$" checksums.txt | sha256sum -c - >/dev/null) \
+    && install -m 0755 "$tmp/$asset" ~/.local/bin/leaf
+  rm -rf "$tmp"
+}
+install_leaf || true
+
+# Symlink leaf's config so Ctrl+E opens vim (leaf ignores $EDITOR and would
+# otherwise default to nano). Symlinking the file, not the directory, keeps
+# `leaf --config remove` from reaching into this repo.
+if [ -f "$DOTFILES_DIR/.config/leaf/config.toml" ]; then
+  mkdir -p "$HOME/.config/leaf"
+  ln -sf "$DOTFILES_DIR/.config/leaf/config.toml" "$HOME/.config/leaf/config.toml"
+fi
+
 # --- Zellij config + zellaude layout ---
 # Symlink our zellij config/layout in. The zellaude plugin referenced in
 # layouts/default.kdl is fetched by zellij on first use and self-installs its
