@@ -1,0 +1,8 @@
+# leaf (terminal Markdown previewer) configuration.
+# Symlinked to ~/.config/leaf/config.toml by install.sh.
+# Full documented defaults: https://github.com/RivoLink/leaf/blob/main/config.toml
+
+# Editor opened by Ctrl+E. leaf ignores $EDITOR and defaults to nano, so set it
+# here. Priority: --editor flag > LEAF_EDITOR > this file > nano.
+# Add +{$line} to open at the line currently visible in leaf: editor = 'vim +{$line}'
+editor = "vim"

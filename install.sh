@@ -217,6 +217,14 @@ install_leaf() {
 }
 install_leaf || true
 
+# Symlink leaf's config so Ctrl+E opens vim (leaf ignores $EDITOR and would
+# otherwise default to nano). Symlinking the file, not the directory, keeps
+# `leaf --config remove` from reaching into this repo.
+if [ -f "$DOTFILES_DIR/.config/leaf/config.toml" ]; then
+  mkdir -p "$HOME/.config/leaf"
+  ln -sf "$DOTFILES_DIR/.config/leaf/config.toml" "$HOME/.config/leaf/config.toml"
+fi
+
 # --- Zellij config + zellaude layout ---
 # Symlink our zellij config/layout in. The zellaude plugin referenced in
 # layouts/default.kdl is fetched by zellij on first use and self-installs its
